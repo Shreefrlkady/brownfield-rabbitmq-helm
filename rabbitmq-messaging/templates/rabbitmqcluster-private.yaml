@@ -1,0 +1,29 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq-private
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.clusters.private.replicas }}
+  image: rabbitmq:4.1.3-management
+  resources:
+    {{- toYaml .Values.clusters.private.resources | nindent 4 }}
+  persistence:
+    storage: {{ .Values.clusters.private.storage | quote }}
+  service:
+    type: ClusterIP
+  rabbitmq:
+    additionalConfig: |
+      cluster_partition_handling = pause_minority
+      vm_memory_high_watermark.relative = 0.7
+      tcp_listen_options.backlog = 128
+      tcp_listen_options.nodelay = true
+      tcp_listen_options.linger.on = true
+      tcp_listen_options.linger.timeout = 0
+      tcp_listen_options.keepalive = false
+    additionalPlugins:
+      {{- toYaml .Values.clusters.private.additionalPlugins | nindent 6 }}
+  {{- if .Values.clusters.private.override }}
+  override:
+    {{- toYaml .Values.clusters.private.override | nindent 4 }}
+  {{- end }}

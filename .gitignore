@@ -1,0 +1,6 @@
+# helm package output
+*.tgz
+
+# local values overrides
+values.local.yaml
+*.local.yaml

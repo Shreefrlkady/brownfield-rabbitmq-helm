@@ -1,0 +1,87 @@
+# PROD.
+
+clusters:
+  private:
+    replicas: 3
+    storage: 20Gi
+    resources:
+      requests:
+        cpu: "500m"
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    override:
+      statefulSet:
+        spec:
+          template:
+            spec:
+              containers:
+                - name: rabbitmq
+                  livenessProbe:
+                    exec:
+                      command: ["rabbitmq-diagnostics", "check_port_connectivity"]
+                    initialDelaySeconds: 60
+                    periodSeconds: 20
+                    timeoutSeconds: 15
+                    failureThreshold: 6
+                  readinessProbe:
+                    exec:
+                      command: ["rabbitmq-diagnostics", "check_port_connectivity"]
+                    initialDelaySeconds: 20
+                    periodSeconds: 10
+                    timeoutSeconds: 10
+                    failureThreshold: 3
+                  # Fidelity: an empty resources block is present on the live CR. It overrides
+                  # nothing, and it is reproduced deliberately — deleting it changes the render,
+                  # which makes the cluster-operator reconcile the private StatefulSet and
+                  # restart brokers. This is the clearest example in the repo of a "cleanup"
+                  # that is actually an outage.
+                  resources: {}
+              terminationGracePeriodSeconds: 120
+  public:
+    replicas: 1
+    storage: 10Gi
+    resources:
+      requests:
+        cpu: "500m"
+        memory: 1Gi
+      limits:
+        cpu: "1"
+        memory: 2Gi
+
+proxyLb:
+  # Name of the reserved internal-LB subnet. Replace with your own.
+  internalSubnet: internal-lb-subnet
+  # Fidelity: vestigial. This annotation is carried on the live, hand-applied Service; no NEGs
+  # exist and no Ingress references it. Reproduced so adoption is a true zero-diff.
+  annotations:
+    cloud.google.com/neg: '{"ingress":true}'
+
+topology:
+  # Left off deliberately. This environment's queues and exchanges were created imperatively
+  # (a one-time migration script driving the RabbitMQ HTTP API, plus shovels declaring their
+  # own destination queues on first message), so there are no Queue/Exchange CRs behind them.
+  # Adopting hundreds of unreviewed queue names into CRs is a separate decision, not a side
+  # effect of installing this chart.
+  declareQueues: false
+  shovels:
+    - name: orders-prod-actions-to-public
+      specName: prod.orders-actions-to-public
+      srcQueue: prod.orders.action
+      destExchange: prod.orders.exchange
+      destExchangeKey: orders.data.action
+      reconnectDelay: 5
+      uriSecret: orders-prod-shovel-uris
+  queues: []
+  exchanges: []
+
+externalSecret:
+  # Must exist in Vault first, with properties orders-prod-shovel-uris-srcUri / -destUri set to
+  # the SAME values as the live Secret.
+  vaultPath: platform/rabbitmq/prod-shovel
+  shovelUris:
+    - orders-prod-shovel-uris
+  # Fidelity: this environment's live ExternalSecret stores the expanded form, written by the
+  # external-secrets controller (which owns the field here). Match it verbatim for zero diff.
+  refreshInterval: 1h0m0s

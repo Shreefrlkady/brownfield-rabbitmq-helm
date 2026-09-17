@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq-proxy-lb
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    networking.gke.io/load-balancer-type: Internal
+    {{- if .Values.proxyLb.internalSubnet }}
+    networking.gke.io/internal-load-balancer-subnet: {{ .Values.proxyLb.internalSubnet }}
+    {{- end }}
+    {{- range $k, $v := .Values.proxyLb.annotations }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector:
+    app.kubernetes.io/name: rabbitmq-public
+  ports:
+    - name: amqp
+      port: 5672
+      protocol: TCP
+      targetPort: 5672
+    - name: management
+      port: 15672
+      protocol: TCP
+      targetPort: 15672

@@ -1,0 +1,91 @@
+# DEV — a combined dev+stage environment: both dev.* and stage.* topology live on the same
+# broker pair. Worth stating explicitly, because it means a stage shovel shares blast radius
+# with dev traffic.
+
+clusters:
+  private:
+    replicas: 1
+    storage: 20Gi
+    resources:
+      requests:
+        cpu: "250m"
+        memory: 500Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    override: {}
+  public:
+    replicas: 1
+    # Fidelity: this matches the CR, which in this environment says 10Gi while the live PVC is
+    # already 20Gi. PVCs cannot shrink, so applying 10Gi changes nothing on the cluster — but
+    # it will show as a permanent, un-reconcilable diff in `argocd app diff` unless
+    # ignoreDifferences covers /spec/resources/requests/storage on PVCs.
+    storage: 10Gi
+    resources:
+      requests:
+        cpu: "200m"
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    # Fidelity: inert. This annotation only does something on a LoadBalancer-type Service, and
+    # this one is ClusterIP. It is live today, so it is reproduced rather than cleaned up —
+    # removing it would render a diff against a running object for no benefit.
+    serviceAnnotations:
+      cloud.google.com/load-balancer-type: Internal
+
+proxyLb:
+  internalSubnet: ""
+
+topology:
+  declareQueues: true
+  shovels:
+    - name: orders-actions-to-public
+      specName: dev.orders-actions-to-public
+      srcQueue: dev.orders.actions
+      destExchange: orders.exchange
+      destExchangeKey: dev.orders.actions
+      reconnectDelay: 6
+      uriSecret: orders-shovel-uris
+    - name: orders-stage-actions-to-public
+      specName: stage.orders-actions-to-public
+      srcQueue: stage.orders.action
+      destExchange: stage.orders.exchange
+      destExchangeKey: orders.data.action
+      reconnectDelay: 6
+      uriSecret: orders-stage-shovel-uris
+    - name: stage-analytics-to-private
+      specName: stage.analytics-to-private
+      srcQueue: stage.analytics.shovel
+      destExchange: stage.analytics.exchange
+      destExchangeKey: analytics.events
+      reconnectDelay: 6
+      uriSecret: analytics-stage-shovel-uris
+  queues:
+    - name: analytics-private
+      specName: stage.analytics
+      cluster: private
+    - name: analytics-shovel-source-public
+      specName: stage.analytics.shovel
+      cluster: public
+    - name: orders-actions-private
+      specName: dev.orders.actions
+      cluster: private
+  exchanges:
+    - name: analytics-exchange-private
+      specName: stage.analytics.exchange
+      cluster: private
+      type: topic
+    - name: analytics-exchange-public
+      specName: stage.analytics.exchange
+      cluster: public
+      type: topic
+
+externalSecret:
+  # Must exist in Vault first, with per-shovel properties <name>-srcUri / <name>-destUri set to
+  # the SAME values as the live Secret (copied verbatim).
+  vaultPath: platform/rabbitmq/dev-shovel
+  shovelUris:
+    - orders-shovel-uris
+    - orders-stage-shovel-uris
+    - analytics-stage-shovel-uris

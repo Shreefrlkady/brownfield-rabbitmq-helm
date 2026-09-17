@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq-cluster-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: rabbitmq-operator
+    app.kubernetes.io/name: rabbitmq-cluster-operator
+    app.kubernetes.io/part-of: rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rabbitmq-cluster-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: rabbitmq-operator
+        app.kubernetes.io/name: rabbitmq-cluster-operator
+        app.kubernetes.io/part-of: rabbitmq
+    spec:
+      serviceAccountName: rabbitmq-cluster-operator
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: operator
+          image: "{{ .Values.clusterOperator.image.repository }}:{{ .Values.clusterOperator.image.tag }}"
+          imagePullPolicy: {{ .Values.clusterOperator.image.pullPolicy }}
+          command: ["/manager"]
+          env:
+            - name: OPERATOR_SCOPE_NAMESPACE
+              value: {{ .Values.clusterOperator.scopeNamespace | quote }}
+            - name: OPERATOR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          ports:
+            - name: metrics
+              containerPort: 9782
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.clusterOperator.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault

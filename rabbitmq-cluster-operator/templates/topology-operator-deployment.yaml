@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: messaging-topology-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/component: rabbitmq-operator
+    app.kubernetes.io/name: messaging-topology-operator
+    app.kubernetes.io/part-of: rabbitmq
+    control-plane: controller-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: messaging-topology-operator
+  template:
+    metadata:
+      {{- if not .Values.topologyOperator.naming.legacy }}
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: rabbitmq-operator
+        app.kubernetes.io/name: messaging-topology-operator
+        app.kubernetes.io/part-of: rabbitmq
+        control-plane: controller-manager
+    spec:
+      serviceAccountName: messaging-topology-operator
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: manager
+          image: "{{ .Values.topologyOperator.image.repository }}:{{ .Values.topologyOperator.image.tag }}"
+          imagePullPolicy: {{ .Values.topologyOperator.image.pullPolicy }}
+          command: ["/manager"]
+          {{- if not .Values.topologyOperator.naming.legacy }}
+          args:
+            - --metrics-bind-address=:8443
+            - --leader-elect
+            - --health-probe-bind-address=:8081
+          {{- end }}
+          env:
+            - name: WATCH_NAMESPACE
+              value: {{ .Values.topologyOperator.watchNamespace | quote }}
+            - name: OPERATOR_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          ports:
+            - name: webhook-server
+              containerPort: 9443
+              protocol: TCP
+          {{- if not .Values.topologyOperator.naming.legacy }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          {{- end }}
+          resources:
+            {{- toYaml .Values.topologyOperator.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: cert
+              mountPath: /tmp/k8s-webhook-server/serving-certs
+              readOnly: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      # webhook-server-cert is created by cert-manager, not by this chart: cert-manager is
+      # assumed to be installed and managed outside this repo, so the Issuer/Certificate pair
+      # from upstream's -with-certmanager release manifest is deliberately not reproduced here.
+      # The Secret must already exist before this Deployment starts.
+      volumes:
+        - name: cert
+          secret:
+            secretName: webhook-server-cert
+            defaultMode: 420

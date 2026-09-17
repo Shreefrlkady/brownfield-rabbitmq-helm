@@ -1,0 +1,12 @@
+The CustomResourceDefinitions under rabbitmq-crds/templates/ are vendored verbatim from the
+upstream RabbitMQ Kubernetes operators:
+
+  - rabbitmq/cluster-operator              (rabbitmqclusters.rabbitmq.com)
+  - rabbitmq/messaging-topology-operator   (all other rabbitmq.com CRDs)
+
+Both projects are licensed under the Mozilla Public License 2.0. The CRD documents are
+unmodified; only their packaging (splitting them into a standalone Helm chart) is this
+repository's work.
+
+  https://github.com/rabbitmq/cluster-operator
+  https://github.com/rabbitmq/messaging-topology-operator

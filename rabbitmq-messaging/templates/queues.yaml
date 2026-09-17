@@ -1,0 +1,17 @@
+{{- if .Values.topology.declareQueues }}
+{{- range .Values.topology.queues }}
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Queue
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  name: {{ .specName }}
+  durable: true
+  vhost: "/"
+  rabbitmqClusterReference:
+    name: rabbitmq-{{ .cluster }}
+    namespace: {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,19 @@
+{{- if .Values.topology.declareQueues }}
+{{- range .Values.topology.exchanges }}
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Exchange
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  name: {{ .specName }}
+  type: {{ .type }}
+  durable: true
+  autoDelete: false
+  vhost: "/"
+  rabbitmqClusterReference:
+    name: rabbitmq-{{ .cluster }}
+    namespace: {{ $.Release.Namespace }}
+{{- end }}
+{{- end }}

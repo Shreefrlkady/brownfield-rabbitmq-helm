@@ -1,0 +1,12 @@
+apiVersion: v2
+name: rabbitmq-crds
+description: >-
+  CustomResourceDefinitions for the RabbitMQ Cluster Operator (rabbitmqclusters) and the
+  messaging-topology-operator (bindings, exchanges, federations, operatorpolicies,
+  permissions, policies, queues, schemareplications, shovels, superstreams,
+  topicpermissions, users, vhosts). Vendored verbatim from the upstream operator releases
+  (cluster-operator 2.19.2, messaging-topology-operator 1.19.0) — see NOTICE. Shipped as its
+  own chart, separate from the workload charts, because Helm never upgrades CRDs that are
+  bundled as a subchart dependency.
+type: application
+version: 0.1.0

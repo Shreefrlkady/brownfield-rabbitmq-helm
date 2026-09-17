@@ -1,0 +1,10 @@
+apiVersion: v2
+name: rabbitmq-cluster-operator
+description: >-
+  RabbitMQ Cluster Operator + Messaging Topology Operator, templated from the upstream release
+  manifests so that a given environment renders byte-for-byte what is already running on it.
+  Excludes cert-manager objects (Issuer/Certificate) by design: cert-manager is assumed to be
+  managed elsewhere, and the topology-operator webhook's caBundle is expected to be injected by
+  it via cert-manager.io/inject-ca-from. Requires the rabbitmq-crds chart to be installed first.
+type: application
+version: 0.1.0

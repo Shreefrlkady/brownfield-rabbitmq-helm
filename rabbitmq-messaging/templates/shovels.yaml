@@ -1,0 +1,23 @@
+{{- range .Values.topology.shovels }}
+---
+apiVersion: rabbitmq.com/v1beta1
+kind: Shovel
+metadata:
+  name: {{ .name }}
+  namespace: {{ $.Release.Namespace }}
+spec:
+  name: {{ .specName }}
+  vhost: "/"
+  rabbitmqClusterReference:
+    name: rabbitmq-private
+    namespace: {{ $.Release.Namespace }}
+  uriSecret:
+    name: {{ .uriSecret }}
+  srcQueue: {{ .srcQueue }}
+  srcDeleteAfter: "never"
+  destExchange: {{ .destExchange }}
+  destExchangeKey: {{ .destExchangeKey }}
+  reconnectDelay: {{ .reconnectDelay }}
+  addForwardHeaders: true
+  ackMode: on-confirm
+{{- end }}

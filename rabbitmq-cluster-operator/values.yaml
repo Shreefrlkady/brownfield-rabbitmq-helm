@@ -1,0 +1,37 @@
+clusterOperator:
+  image:
+    repository: rabbitmqoperator/cluster-operator
+    tag: 2.19.2
+    pullPolicy: IfNotPresent
+  scopeNamespace: messaging
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+topologyOperator:
+  image:
+    repository: ghcr.io/rabbitmq/messaging-topology-operator
+    tag: 1.19.0
+    pullPolicy: IfNotPresent
+  watchNamespace: messaging
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+  # The 1.19.0 release restructured the topology operator's manifest: object names gained a
+  # "messaging-topology-" prefix, a metrics service + cert + metrics-auth RBAC appeared, and the
+  # container gained --leader-elect/--health-probe args plus liveness/readiness probes.
+  #
+  # One toggle renders either layout, because the two environments here sit on either side of
+  # that jump and BOTH have to render byte-exact against what is already running:
+  #   legacy: true   -> pre-1.19.0 layout (bare names, no metrics objects, no args or probes)
+  #   legacy: false  -> 1.19.0 layout
+  naming:
+    legacy: false

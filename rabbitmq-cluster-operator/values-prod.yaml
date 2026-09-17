@@ -1,0 +1,13 @@
+# PROD — pinned to the operator versions actually running here.
+
+clusterOperator:
+  image:
+    tag: 2.19.2
+
+topologyOperator:
+  image:
+    repository: ghcr.io/rabbitmq/messaging-topology-operator
+    tag: 1.19.0
+    pullPolicy: IfNotPresent
+  naming:
+    legacy: false

@@ -1,0 +1,93 @@
+{{- $svc := ternary "webhook-service" "messaging-topology-webhook-service" .Values.topologyOperator.naming.legacy }}
+{{- if .Values.topologyOperator.naming.legacy }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: topology.rabbitmq.com
+  annotations:
+    # Injected by cert-manager, already installed on-cluster (out of scope for this chart).
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/serving-cert
+webhooks:
+  {{- range list
+    (dict "name" "vbinding.kb.io"            "path" "binding"            "resource" "bindings"            "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vexchange.kb.io"           "path" "exchange"           "resource" "exchanges"           "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vfederation.kb.io"         "path" "federation"         "resource" "federations"         "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "voperatorpolicy.kb.io"     "path" "operatorpolicy"     "resource" "operatorpolicies"    "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vpermission.kb.io"         "path" "permission"         "resource" "permissions"         "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vpolicy.kb.io"             "path" "policy"             "resource" "policies"            "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vqueue.kb.io"              "path" "queue"              "resource" "queues"              "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vschemareplication.kb.io"  "path" "schemareplication"  "resource" "schemareplications"  "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vshovel.kb.io"             "path" "shovel"             "resource" "shovels"             "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vsuperstream.kb.io"        "path" "superstream"        "resource" "superstreams"        "apiVersion" "v1alpha1" "reviewVersions" (list "v1"))
+    (dict "name" "vtopicpermission.kb.io"    "path" "topicpermission"    "resource" "topicpermissions"    "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+    (dict "name" "vuser.kb.io"               "path" "user"               "resource" "users"               "apiVersion" "v1beta1" "reviewVersions" (list "v1" "v1beta1"))
+    (dict "name" "vvhost.kb.io"              "path" "vhost"              "resource" "vhosts"              "apiVersion" "v1beta1" "reviewVersions" (list "v1"))
+  }}
+  - name: {{ .name }}
+    admissionReviewVersions: {{ .reviewVersions | toJson }}
+    clientConfig:
+      service:
+        name: {{ $svc }}
+        namespace: {{ $.Release.Namespace }}
+        path: /validate-rabbitmq-com-{{ .apiVersion }}-{{ .path }}
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["rabbitmq.com"]
+        apiVersions: [{{ .apiVersion | quote }}]
+        operations: ["CREATE", "UPDATE"]
+        resources: [{{ .resource | quote }}]
+    sideEffects: None
+  {{- end }}
+{{- else }}
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: messaging-topology-validating-webhook-configuration
+  annotations:
+    # Injected by cert-manager, already installed on-cluster (out of scope for this chart).
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/messaging-topology-serving-cert
+webhooks:
+  {{- range list
+    (dict "name" "vbinding-v1beta1.kb.io"          "path" "binding"            "resource" "bindings")
+    (dict "name" "vexchange.kb.io"                 "path" "exchange"           "resource" "exchanges")
+    (dict "name" "vfederation.kb.io"               "path" "federation"         "resource" "federations")
+    (dict "name" "voperatorpolicy-v1beta1.kb.io"   "path" "operatorpolicy"     "resource" "operatorpolicies")
+    (dict "name" "vpermission-v1beta1.kb.io"       "path" "permission"         "resource" "permissions")
+    (dict "name" "vpolicy.kb.io"                   "path" "policy"             "resource" "policies")
+    (dict "name" "vqueue.kb.io"                    "path" "queue"              "resource" "queues")
+    (dict "name" "vschemareplication-v1beta1.kb.io" "path" "schemareplication" "resource" "schemareplications")
+    (dict "name" "vshovel-v1beta1.kb.io"           "path" "shovel"             "resource" "shovels")
+    (dict "name" "vtopicpermission-v1beta1.kb.io"  "path" "topicpermission"    "resource" "topicpermissions")
+    (dict "name" "vuser.kb.io"                     "path" "user"               "resource" "users")
+    (dict "name" "vvhost.kb.io"                    "path" "vhost"              "resource" "vhosts")
+  }}
+  - name: {{ .name }}
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: {{ $svc }}
+        namespace: {{ $.Release.Namespace }}
+        path: /validate-rabbitmq-com-v1beta1-{{ .path }}
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["rabbitmq.com"]
+        apiVersions: ["v1beta1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: [{{ .resource | quote }}]
+    sideEffects: None
+  {{- end }}
+  - name: vsuperstream-v1alpha1.kb.io
+    admissionReviewVersions: ["v1"]
+    clientConfig:
+      service:
+        name: {{ $svc }}
+        namespace: {{ .Release.Namespace }}
+        path: /validate-rabbitmq-com-v1alpha1-superstream
+    failurePolicy: Fail
+    rules:
+      - apiGroups: ["rabbitmq.com"]
+        apiVersions: ["v1alpha1"]
+        operations: ["CREATE", "UPDATE"]
+        resources: ["superstreams"]
+    sideEffects: None
+{{- end }}

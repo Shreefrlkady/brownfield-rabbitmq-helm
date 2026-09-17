@@ -1,0 +1,89 @@
+# Base values. Every environment overrides these in values-<env>.yaml.
+#
+# These charts are written for ADOPTION of an already-running RabbitMQ estate: the rendered
+# output is expected to match live objects byte-for-byte so the first apply is a no-op.
+# Some values therefore exist only to reproduce something already live — they are marked
+# "fidelity" below. Removing one looks like a cleanup and is actually a live change.
+
+clusters:
+  private:
+    replicas: 1
+    storage: 20Gi
+    resources:
+      requests:
+        cpu: "250m"
+        memory: 500Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    additionalPlugins:
+      - rabbitmq_management
+      - rabbitmq_prometheus
+      - rabbitmq_shovel
+      - rabbitmq_shovel_management
+    override: {}
+  public:
+    replicas: 1
+    storage: 10Gi
+    resources:
+      requests:
+        cpu: "200m"
+        memory: 512Mi
+      limits:
+        cpu: "1"
+        memory: 1Gi
+    additionalPlugins:
+      - rabbitmq_management
+      - rabbitmq_prometheus
+    serviceAnnotations: {}
+
+# Internal-LB subnet for Service/rabbitmq-proxy-lb. Empty string means "let GKE pick the
+# default subnet".
+proxyLb:
+  internalSubnet: ""
+  annotations: {}
+
+# Ships DISABLED on purpose.
+#
+# A multi-replica cluster running cluster_partition_handling=pause_minority with no PDB can be
+# taken offline by an ordinary node drain: nothing stops the eviction of a majority of pods at
+# once, and the surviving minority pauses itself. That is worth fixing — but adopting a chart
+# should never silently change disruption behaviour on a running system. Enable it as a
+# separate, reviewed change.
+pdb:
+  enabled: false
+  maxUnavailable: 1
+
+topology:
+  # Queue/Exchange CRs are gated separately from Shovels. An estate whose queues were created
+  # imperatively (or declared by the shovels themselves on first message) should NOT have
+  # hundreds of unreviewed queue names adopted into CRs as a side effect of installing this
+  # chart. Turn this on per environment, deliberately.
+  declareQueues: false
+  shovels: []
+  queues: []
+  exchanges: []
+
+externalSecret:
+  secretStoreName: vault-backend
+  # One Vault KV v2 secret per environment holds every shovel URI, keyed by the per-shovel
+  # properties <name>-srcUri / <name>-destUri.
+  #
+  # Note the path carries no "secret/data/" prefix: the ClusterSecretStore already mounts at
+  # "secret" with version v2, so keys are relative to the mount. Set per-env; empty here so the
+  # base chart never emits ExternalSecrets by default.
+  vaultPath: ""
+  # One ExternalSecret per live "*-shovel-uris" Secret.
+  #
+  # IMPORTANT for adoption: the Vault path must exist, with values identical to the live
+  # Secret, BEFORE applying. creationPolicy is Owner, so external-secrets adopts the existing
+  # Secret — identical content makes that a no-op and the shovels never blink. A failed lookup
+  # after adoption empties the Secret instead.
+  shovelUris: []
+  # How often external-secrets re-reads Vault.
+  #
+  # Rendered per-env because the two clusters store this field in different but semantically
+  # identical forms ("1h" vs the expanded "1h0m0s"), depending on the external-secrets version
+  # and which controller owns the field. Matching the stored form verbatim is what keeps
+  # adoption a true zero-diff on both.
+  refreshInterval: 1h

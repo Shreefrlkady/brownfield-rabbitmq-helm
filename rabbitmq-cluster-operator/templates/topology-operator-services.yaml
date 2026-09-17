@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  {{- if .Values.topologyOperator.naming.legacy }}
+  name: webhook-service
+  {{- else }}
+  name: messaging-topology-webhook-service
+  {{- end }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: messaging-topology-operator
+spec:
+  type: ClusterIP
+  ports:
+    - port: 443
+      protocol: TCP
+      targetPort: 9443
+  selector:
+    app.kubernetes.io/name: messaging-topology-operator
+    {{- if not .Values.topologyOperator.naming.legacy }}
+    control-plane: controller-manager
+    {{- end }}
+{{- if not .Values.topologyOperator.naming.legacy }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: messaging-topology-controller-metrics-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: messaging-topology-operator
+    control-plane: controller-manager
+spec:
+  type: ClusterIP
+  ports:
+    - name: https
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
+  selector:
+    app.kubernetes.io/name: messaging-topology-operator
+    control-plane: controller-manager
+{{- end }}

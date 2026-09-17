@@ -1,0 +1,15 @@
+# DEV — pinned to the operator versions actually running here. The two environments
+# deliberately sit on either side of the topology-operator 1.19.0 manifest restructure
+# (see topologyOperator.naming.legacy in values.yaml).
+
+clusterOperator:
+  image:
+    tag: 2.19.1
+
+topologyOperator:
+  image:
+    repository: rabbitmqoperator/messaging-topology-operator
+    tag: 1.18.3
+    pullPolicy: Always
+  naming:
+    legacy: true

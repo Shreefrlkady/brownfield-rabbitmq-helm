@@ -1,0 +1,10 @@
+apiVersion: v2
+name: rabbitmq-messaging
+description: >-
+  RabbitmqCluster CRs (rabbitmq-private, rabbitmq-public), a hand-authored internal proxy
+  LoadBalancer Service, Shovel/Queue/Exchange topology, an optional PodDisruptionBudget (off by
+  default), and the ExternalSecrets carrying each shovel's source/destination URIs. Written for
+  adoption of a running estate: the render is expected to match live objects exactly. Requires
+  the rabbitmq-crds and rabbitmq-cluster-operator charts to be installed first.
+type: application
+version: 0.1.0
