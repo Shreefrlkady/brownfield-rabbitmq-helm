@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200" font-family="DejaVu Sans, Noto Sans, sans-serif">
+  <defs>
+    <radialGradient id="g1" cx="88%" cy="-10%" r="70%">
+      <stop offset="0%" stop-color="#ff6b2c" stop-opacity="0.17"/>
+      <stop offset="62%" stop-color="#ff6b2c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="g2" cx="-12%" cy="110%" r="65%">
+      <stop offset="0%" stop-color="#3ddc91" stop-opacity="0.10"/>
+      <stop offset="62%" stop-color="#3ddc91" stop-opacity="0"/>
+    </radialGradient>
+    <marker id="ar" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto">
+      <path d="M0,0 L10,5.5 L0,11 z" fill="#3a5070"/>
+    </marker>
+    <marker id="arO" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto">
+      <path d="M0,0 L10,5.5 L0,11 z" fill="#ff6b2c"/>
+    </marker>
+    <marker id="arD" markerWidth="11" markerHeight="11" refX="8" refY="5.5" orient="auto">
+      <path d="M0,0 L10,5.5 L0,11 z" fill="#3a5070"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="1200" fill="#0b1220"/>
+  <rect width="1200" height="1200" fill="url(#g1)"/>
+  <rect width="1200" height="1200" fill="url(#g2)"/>
+
+  <!-- header -->
+  <text x="70" y="96" fill="#ff6b2c" font-family="DejaVu Sans Mono, monospace" font-size="17" letter-spacing="3">BROWNFIELD ADOPTION</text>
+  <line x1="290" y1="90" x2="1130" y2="90" stroke="#ff6b2c" stroke-opacity="0.35"/>
+
+  <text x="70" y="172" fill="#f1f5f9" font-size="60" font-weight="bold" letter-spacing="-1">The objects never move.</text>
+  <text x="70" y="216" fill="#93a8c2" font-size="24">Bringing a running RabbitMQ estate under Helm —</text>
+  <text x="70" y="250" fill="#93a8c2" font-size="24">without recreating a single object.</text>
+
+  <!-- step 1: provenance -->
+  <text x="70" y="316" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="16" letter-spacing="2">1 — HOW IT WAS INSTALLED</text>
+
+  <rect x="70" y="334" width="515" height="104" rx="12" fill="#111c2e" stroke="#1f2f48"/>
+  <rect x="70" y="334" width="3.5" height="104" rx="2" fill="#ff6b2c"/>
+  <text x="96" y="372" fill="#f1f5f9" font-size="24" font-weight="bold">kubectl apply -k</text>
+  <text x="96" y="404" fill="#93a8c2" font-family="DejaVu Sans Mono, monospace" font-size="17">last-applied-configuration</text>
+  <text x="96" y="426" fill="#6b83a1" font-size="17">the manifest, verbatim</text>
+
+  <rect x="615" y="334" width="515" height="104" rx="12" fill="#111c2e" stroke="#1f2f48"/>
+  <rect x="615" y="334" width="3.5" height="104" rx="2" fill="#ff6b2c"/>
+  <text x="641" y="372" fill="#f1f5f9" font-size="24" font-weight="bold">restored from backup</text>
+  <text x="641" y="404" fill="#93a8c2" font-family="DejaVu Sans Mono, monospace" font-size="17">gkebackup-restore-uid</text>
+  <text x="641" y="426" fill="#6b83a1" font-size="17">no manifest survives</text>
+
+  <path d="M600,446 L600,486" stroke="#3a5070" stroke-width="2" marker-end="url(#arD)"/>
+  <text x="620" y="476" fill="#6b83a1" font-size="17">read-only audit → the spec</text>
+
+  <!-- step 2: live objects -->
+  <text x="70" y="528" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="16" letter-spacing="2">2 — WHAT IS RUNNING</text>
+
+  <rect x="70" y="546" width="1060" height="176" rx="14" fill="#0e1a2b" stroke="#27405f"/>
+  <rect x="70" y="546" width="1060" height="176" rx="14" fill="none" stroke="#3ddc91" stroke-opacity="0.32"/>
+
+  <text x="96" y="586" fill="#f1f5f9" font-size="25" font-weight="bold">Live RabbitMQ estate</text>
+  <text x="96" y="614" fill="#6b83a1" font-size="18">these objects are never deleted, recreated, or restarted</text>
+
+  <rect x="96" y="636" width="228" height="60" rx="9" fill="#16233a" stroke="#27405f"/>
+  <text x="112" y="662" fill="#d3e3f7" font-family="DejaVu Sans Mono, monospace" font-size="16">RabbitmqCluster</text>
+  <text x="112" y="684" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="15">private · public</text>
+
+  <rect x="340" y="636" width="196" height="60" rx="9" fill="#16233a" stroke="#27405f"/>
+  <text x="356" y="662" fill="#d3e3f7" font-family="DejaVu Sans Mono, monospace" font-size="16">StatefulSets</text>
+  <text x="356" y="684" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="15">+ PVCs</text>
+
+  <rect x="552" y="636" width="196" height="60" rx="9" fill="#16233a" stroke="#27405f"/>
+  <text x="568" y="662" fill="#d3e3f7" font-family="DejaVu Sans Mono, monospace" font-size="16">Shovel CRs</text>
+  <text x="568" y="684" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="15">in-flight</text>
+
+  <rect x="764" y="636" width="196" height="60" rx="9" fill="#16233a" stroke="#27405f"/>
+  <text x="780" y="662" fill="#d3e3f7" font-family="DejaVu Sans Mono, monospace" font-size="16">Secrets</text>
+  <text x="780" y="684" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="15">shovel URIs</text>
+
+  <rect x="976" y="636" width="130" height="60" rx="9" fill="#16233a" stroke="#27405f"/>
+  <text x="992" y="662" fill="#d3e3f7" font-family="DejaVu Sans Mono, monospace" font-size="16">Service</text>
+  <text x="992" y="684" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="15">proxy LB</text>
+
+  <path d="M600,730 L600,776" stroke="#ff6b2c" stroke-width="2.5" marker-end="url(#arO)"/>
+
+  <!-- step 3: what actually changes -->
+  <text x="70" y="818" fill="#6b83a1" font-family="DejaVu Sans Mono, monospace" font-size="16" letter-spacing="2">3 — WHAT ACTUALLY CHANGES</text>
+
+  <rect x="70" y="836" width="1060" height="132" rx="14" fill="#111c2e" stroke="#1f2f48"/>
+  <rect x="70" y="836" width="3.5" height="132" rx="2" fill="#ff6b2c"/>
+
+  <text x="96" y="878" fill="#ff6b2c" font-family="DejaVu Sans Mono, monospace" font-size="21">helm upgrade --install --take-ownership</text>
+  <text x="96" y="914" fill="#f1f5f9" font-size="22">One new object: the release record.</text>
+  <text x="96" y="946" fill="#93a8c2" font-family="DejaVu Sans Mono, monospace" font-size="18">Secret/sh.helm.release.v1.*  ·  everything else untouched</text>
+
+  <!-- gate -->
+  <rect x="70" y="998" width="1060" height="96" rx="14" fill="#0a1f1a" stroke="#3ddc91" stroke-opacity="0.34"/>
+  <circle cx="112" cy="1046" r="6" fill="#3ddc91"/>
+  <text x="140" y="1038" fill="#3ddc91" font-family="DejaVu Sans Mono, monospace" font-size="19">helm template | kubectl diff  →  no changes</text>
+  <text x="140" y="1068" fill="#6b83a1" font-size="18">the gate: if the render is not byte-exact, it is not adoption</text>
+
+  <text x="70" y="1150" fill="#3a5070" font-family="DejaVu Sans Mono, monospace" font-size="17">github.com/Shreefrlkady/brownfield-rabbitmq-helm</text>
+</svg>

@@ -14,6 +14,8 @@ cannot be restarted at will.
 
 [bitnami]: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq-cluster-operator
 
+![Adopting a live RabbitMQ estate into Helm: how it was installed, what is running, and what actually changes](docs/adoption.png)
+
 ## The problem
 
 Two GKE clusters, each running two RabbitMQ clusters under the RabbitMQ Cluster Operator. One
