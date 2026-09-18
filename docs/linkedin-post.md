@@ -1,8 +1,8 @@
 # LinkedIn post
 
-Draft accompanying this repo. Use the copy button on the block below — it is 2,992 characters, just under the 3,000 limit.
+Draft accompanying this repo. Use the copy button on the block below — 2,920 characters, under the 3,000 limit. The repo link is in the body, so no first comment is needed.
 
-Attach both images, diagram first: `docs/adoption.png`, then `docs/card.png`.
+Image: `docs/adoption.png`
 
 ```text
 How do you put a running RabbitMQ cluster under Helm without restarting it?
@@ -23,7 +23,7 @@ Two different installation stories, both readable from the live cluster with rea
 
 That audit became the spec — not the old local files, which were stale and out of sync with what was actually running.
 
-Everything got templated by hand from that evidence. Nothing forked, no subchart wrapped. One toggle reproduces two different upstream manifest layouts, because the clusters had drifted a version apart and both had to render byte-exact. The CRDs are the one thing vendored verbatim — they're API definitions, and they ship as their own chart because Helm won't upgrade CRDs bundled as a subchart.
+Everything got templated by hand from that evidence. Nothing forked, no subchart wrapped. One toggle reproduces two different upstream manifest layouts, because the clusters had drifted a version apart and both had to render byte-exact.
 
 Then the part that changed how I think about charts.
 
@@ -50,14 +50,8 @@ Writing a chart that proves it changes nothing is the actual engineering.
 
 Ever adopted live infra into IaC? Curious whether you went adopt-in-place or rebuild-and-cut-over.
 
+Charts and the full write-up:
+https://github.com/Shreefrlkady/brownfield-rabbitmq-helm
+
 #Kubernetes #Helm #RabbitMQ #DevOps #GitOps
-```
-
-## First comment
-
-Post the repo link as your own first comment rather than in the body — LinkedIn suppresses reach on posts with external links, and the body has no room left.
-
-```text
-Charts and the full write-up — the audit method, the zero-diff rules, and what was deliberately left out:
-github.com/Shreefrlkady/brownfield-rabbitmq-helm
 ```
